@@ -138,20 +138,33 @@ function panTo(intersect) {
 
         console.log("Tweening!");
         var tweenCamera = new TWEEN.Tween(camera.position).to(newCameraPosition, 1500);
+        controls.enabled = false;
         tweenCamera.onUpdate(function () {
             console.log(camera.position);
+            // controls.center = camera.position.clone();
+            // controls.center.z = 0;
+            // console.log("controls center: ", controls.center);
             // console.log("Moving camera...");
             needToRender = true;
         });
-        var tweenControls = new TWEEN.Tween(controls.center).to(mesh.position, 5000);
-        tweenControls.onUpdate(function () {
-            // console.log("Moving controls center...");
-            needToRender = true;
+        tweenCamera.onComplete(function () {
+            console.log("Done tweening!");
+            controls.center = mesh.position.clone();
+            controls.target = mesh.position.clone();
+            console.log("controls center: ", controls.center);
+            controls.enabled = true;
+
+            //update();
         });
+        // var tweenControls = new TWEEN.Tween(controls.center).to(mesh.position, 5000);
+        // tweenControls.onUpdate(function () {
+        //     // console.log("Moving controls center...");
+        //     needToRender = true;
+        // });
 
         needToRender = true;
         tweenCamera.start();
-        tweenControls.start();
+        // tweenControls.start();
     } else {
         console.log("The hell, we couldn't find the floor!");
     }
@@ -180,6 +193,8 @@ for(var i in nodes) {
 scene.add(cubes);
 
 function controlChange() {
+    //console.log(controls);
+    console.log("Controls center: ", controls.center);
     needToRender = true;
     render();
 }
@@ -192,8 +207,8 @@ function render() {
     requestAnimationFrame( render );
     if(needToRender) {
         renderer.render( scene, camera );
-        floor.position.x = camera.position.x;
-        floor.position.y = camera.position.y;
+        // floor.position.x = camera.position.x;
+        // floor.position.y = camera.position.y;
         needToRender = false;
         TWEEN.update();
     }
