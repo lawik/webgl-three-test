@@ -17,6 +17,20 @@ for(var i = 0; i <= 25; i++) {
     addNode(i, i*i, 'Node: '+i, 'normal');
 }
 
+// STATS
+
+var stats = new Stats();
+stats.setMode(0); // 0: fps, 1: ms
+
+// align top-left
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+
+document.body.appendChild( stats.domElement );
+
+// SCENE
+
 console.log("Nodes:", nodes);
 
 var scene = new THREE.Scene();
@@ -140,11 +154,12 @@ function panTo(intersect) {
         var tweenCamera = new TWEEN.Tween(camera.position).to(newCameraPosition, 1500);
         controls.enabled = false;
         tweenCamera.onUpdate(function () {
-            console.log(camera.position);
+            //console.log(camera.position);
             // controls.center = camera.position.clone();
             // controls.center.z = 0;
             // console.log("controls center: ", controls.center);
             // console.log("Moving camera...");
+            console.log("Tween updated...");
             needToRender = true;
         });
         tweenCamera.onComplete(function () {
@@ -205,12 +220,17 @@ function update() {
 
 function render() {
     requestAnimationFrame( render );
+//    console.log("Render?", needToRender);
     if(needToRender) {
+        console.log("Rendering...");
+        stats.begin();
         renderer.render( scene, camera );
+
         // floor.position.x = camera.position.x;
         // floor.position.y = camera.position.y;
         needToRender = false;
         TWEEN.update();
+        stats.end();
     }
 
     //console.log("Render camera position:", camera.position);
