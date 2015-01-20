@@ -211,7 +211,7 @@ function controlChange() {
     //console.log(controls);
     console.log("Controls center: ", controls.center);
     needToRender = true;
-    render();
+    //render();
 }
 
 function update() {
@@ -219,6 +219,7 @@ function update() {
 }
 
 function render() {
+    //needToRender = true;
     requestAnimationFrame( render );
 //    console.log("Render?", needToRender);
     if(needToRender) {
