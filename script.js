@@ -1,7 +1,15 @@
+var nodes = [];
 
 var needToRender = true; // Causes first render
 
-var nodes = [];
+function goRender() {
+    needToRender = true;
+}
+
+function openDialog(mesh) {
+    $(".dialog").remove();
+    $("body").append('<div class="dialog"><h2>'+mesh.label+'</h2><div class="dialog-body"><p>Lorem ipsum dolor sit amet.</p></div></div>');
+}
 
 function addNode(x,y,title,type) {
     nodes.push({
@@ -36,12 +44,17 @@ console.log("Nodes:", nodes);
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-camera.rotation.x = 45;
-
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( window.innerWidth, window.innerHeight );
-controls = new THREE.OrbitControls( camera, renderer.domElement );
+//controls = new THREE.OrbitControls( camera, renderer.domElement );
+//controls = new THREE.MouseControls( camera );
+controls = new THREE.EditorControls( camera, renderer.domElement );
 controls.addEventListener( 'change', controlChange );
+//this.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT };
+//controls.noRotate = true;
+
+controls.keyPanSpeed = 14.0;  // pixels moved per arrow key push
+controls.mouseButtons = { ORBIT: THREE.MOUSE.RIGHT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.LEFT };
 document.body.appendChild( renderer.domElement );
 
 containerWidth = window.innerWidth;
@@ -87,10 +100,11 @@ function onMouseUp(e) {
 
 window.addEventListener('mouseup', onMouseUp, false);
 
-var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+//var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+var geometry = new THREE.CylinderGeometry(1, 1, 1, 200, 200);
 var floorPlane = new THREE.PlaneGeometry( 200, 200 );
-var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x333333 });
-var material = new THREE.MeshBasicMaterial( { color: 0x00ffff } );
+var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x7ec3f2 });
+var material = new THREE.MeshLambertMaterial( { color: 0x00cc00 } );
 floorPlane.isFloor = true;
 var floor = new THREE.Mesh( floorPlane, floorMaterial );
 flooring.add( floor );
@@ -106,9 +120,9 @@ var lineMaterial = new THREE.LineBasicMaterial({
 //var cube = new THREE.Mesh( geometry, material );
 //scene.add( cube );
 
-// var light = new THREE.PointLight( 0xffffff, 1, 100 );
-// light.position.set( 5, 10, 10 );
-// scene.add( light );
+var light = new THREE.PointLight( 0xffffff, 1, 100 );
+light.position.set( 5, 10, 10 );
+scene.add( light );
 
 function panTo(intersect) {
     var mesh = intersect.object;
@@ -151,7 +165,7 @@ function panTo(intersect) {
         // };
 
         console.log("Tweening!");
-        var tweenCamera = new TWEEN.Tween(camera.position).to(newCameraPosition, 1500);
+        var tweenCamera = new TWEEN.Tween(camera.position).to(newCameraPosition, 1000);
         controls.enabled = false;
         tweenCamera.onUpdate(function () {
             //console.log(camera.position);
@@ -164,11 +178,13 @@ function panTo(intersect) {
         });
         tweenCamera.onComplete(function () {
             console.log("Done tweening!");
-            controls.center = mesh.position.clone();
-            controls.target = mesh.position.clone();
-            console.log("controls center: ", controls.center);
+            //controls.center = mesh.position.clone();
+            controls.focus(mesh);
+            //controls.target = mesh.position.clone();
+            //console.log("controls center: ", controls.center);
             controls.enabled = true;
 
+            openDialog(mesh);
             //update();
         });
         // var tweenControls = new TWEEN.Tween(controls.center).to(mesh.position, 5000);
@@ -184,22 +200,16 @@ function panTo(intersect) {
         console.log("The hell, we couldn't find the floor!");
     }
 
-
-
-
-
-
     // update();
     // render();
 }
-
-camera.position.z = 5;
 
 for(var i in nodes) {
     var cube = new THREE.Mesh( geometry, material );
     cube.position.x = nodes[i].x;
     cube.position.y = nodes[i].y;
-    cube.label = i;
+    cube.label = "Node #"+i;
+    cube.rotation.x = (90 * (Math.PI / 180));
     nodes[i].mesh = cube;
     cubes.add(cube);
     //scene.add(cube);
@@ -209,7 +219,7 @@ scene.add(cubes);
 
 function controlChange() {
     //console.log(controls);
-    console.log("Controls center: ", controls.center);
+    //console.log("Controls center: ", controls.center);
     needToRender = true;
     //render();
 }
@@ -236,6 +246,10 @@ function render() {
 
     //console.log("Render camera position:", camera.position);
 }
+
+camera.position.z = 5;
+camera.rotation.x = (45 * (Math.PI / 180));
+console.log(camera.quaternion);
 
 render();
 
